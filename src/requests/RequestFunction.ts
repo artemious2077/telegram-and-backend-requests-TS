@@ -1,69 +1,67 @@
 import { create } from 'zustand'
 import axios from 'axios'
 
-// токен бота @Private_messege_bot
+// our bot token @Private_messege_bot
 const botToken = '7958626938:AAHN03izGXXvHLpKyjoRJM-r0Jp-xN7xz3A'
 
 export const TelegramRequest = create(() => ({
-  // по скольку идёт только POST запрос, без сохранения данных в локально и не использую их в UI
+  // [] - massive for show our receive UI. Because we use POST request, we don't need this state
   // formData: [],
   formRequest: async (
     message: string,
     phone: number,
     date: number,
-    // тип string т.к. получаемое ID с localStorage является строкой
+    // I placed "string" type, because I receive chat ID from localStorage
     chatId: string,
   ) => {
     const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`
-    // Форматируем сообщение
+    // Set up our sended message on the telegram
     const formattedMessage = `
-     Сообщение: ${message}
-     ID пользователя: ${phone}
-     Дата: ${date}
+     Message: ${message}
+     User ID: ${phone}
+     Order date: ${date}
    `
     try {
       const response = await axios.post(telegramUrl, {
-        // мой ID чата
+        // My chat ID
         // const chatId = 1686652259
-        // ID чата с Ваньком
-        // const chatId = 6493188313
-        // специализированный бот (это то же айди чата с Ваньком)
+        // Bot chat ID with my friend. I can see it on browser console
         // const chatId = 6493188313
         chat_id: chatId,
         text: formattedMessage,
-        // text: JSON.stringify(data) нужно выбирать, если у меня в форме не просто отправка текстового сообщения а например номер и почта ещё
+        // text: JSON.stringify(data) need to selected if i have no only one input, if o have many inputs (text, data, number...)
         // text: data,
       })
-      // очень опасно в консоль отправлять данные с формы. Не опасно только на время тестирвоания формы
-      //   console.log('Сообщение отправлено:', response.data)
-      console.log('Сообщение отправлено')
+      // Its very dangerous sending form data to browser console. Not dangerous on testing time
+      //   console.log('Message sended:', response.data)
+      console.log('Message sended')
     } catch (error) {
-      console.error('Ошибка отправки сообщения', error)
+      console.error('Message sended error', error)
     }
   },
 }))
 
-// глобальная константа получения ID чата с ботом
+// Global const for receive bot chat ID
 const telegramApiUrl = `https://api.telegram.org/bot${botToken}/getUpdates`
 
-// тип состояния для ф-ции BotChatId
+// BotChatId_state - this is type state for BotChatId function
 interface BotChatId_state {
   chatId: string | null
   offset: number
   getChatId: () => Promise<void>
 }
 
-// функция получения ID чата с ботом
+// Received ID bot chat function
 export const BotChatId = create<BotChatId_state>((set, get) => ({
   chatId: null,
   offset: 0,
   getChatId: async () => {
-    // Получаем текущее состояние с помощью get
+    // Receive update by using get
     const { offset } = get()
 
     const updateResponse = await axios.get(telegramApiUrl, {
       params: {
-        // Получаем обновления с текущим offset
+        // Receive updates with current offset
         offset: offset,
       },
     })
@@ -73,15 +71,16 @@ export const BotChatId = create<BotChatId_state>((set, get) => ({
     if (updates.length > 0) {
       updates.forEach((update: any) => {
         const chatId = update.message.chat.id
-        // Обновляем chatId в состоянии и перед этим фильтруем только ID заказчика
-        if (chatId == 6088640425) {
-          set({ chatId })
-          localStorage.setItem('Customer chat_id', chatId)
-        } else {
-          console.log('Not customer chat_id')
-        }
+        // Now, we updating chatId state
+        // If we need filter our chatId, we can create next logic (this logic in commented)
+        // if (chatId == 6088640425) {
+        set({ chatId })
+        localStorage.setItem('Customer chat ID', chatId)
+        // } else {
+        //   console.log('Not customer chat ID')
+        // }
       })
-      // Обновляем offset, чтобы не получать уже обработанные обновления
+      // Update offset state for avoid received processed update
       set({ offset: updates })
     } else {
       console.log('No updates found')

@@ -3,80 +3,65 @@ import styles from './page.module.css'
 import { BotChatId, TelegramRequest } from '@/requests/RequestFunction'
 import Image from 'next/image'
 import { FormEvent, useEffect, useState } from 'react'
-import chief from '@/assets/images/babinovWatchYou.png'
+import chief from '@/assets/images/andre-rush.png'
+import { AnswerCircle } from '@/app/modules/AnswerCircle/AnswerCircle'
 
 export const Home: React.FC = () => {
   const { formRequest } = TelegramRequest()
   const [message, setMessage] = useState<string>('')
+  // we using | sign, not logic || sign
   const [phone, setPhone] = useState<number | null>(null)
   const [date, setDate] = useState<string>('')
-  // используем объединение типов знаком | а не логическим сравнением ||
-  const [chatId, setChatId] = useState<string | null>(null) // состояние для хранения chatId
-
-  // получаем хуки состояния из BotChatId
+  // chat ID state save
+  const [chatId, setChatId] = useState<string | null>(null)
+  // receiving state hooks from BotChatId
   const { chatId: storedChatId, getChatId } = BotChatId()
 
-  // загружаем chatId при монтировании компонента
+  // loaded chat ID on component mounting
   useEffect(() => {
     const fetchChatId = async () => {
-      // берём сохранённое ID чата заказчика с ботом из localStorage
+      // taking chat ID (to our bot-chat with people) from localStorage
       const savedChatId: string | null = localStorage.getItem('chatId')
-      if (savedChatId) {
-        // получаем обновления с помощью getChatId
-        setChatId(savedChatId)
-        console.log('ID чата загружен из локального хранилища:', savedChatId)
-      } else {
-        await getChatId()
-        // преобразуем в строку полученное ID чата с localStorage т.к. в хранилище оно является строкой
-        const fetchedChatId = String(storedChatId)
-        if (fetchedChatId) {
-          // обновление состояние chatId
-          setChatId(storedChatId)
-          // првоеряем в консоли зпгруденный ID
-          console.log('ID чата загружен:', storedChatId)
-          // сохранение полученного ID чата в localStorage в виде строки т.к. в виде числа никак нельзя в TS
-          localStorage.setItem('ID чата взято', fetchedChatId.toString())
-        } else {
-          console.error('Не удалось загрузить ID чата')
-        }
-      }
+      setChatId(savedChatId)
     }
-    // запускаем ф-цию отправкии данных с формы
+    // activating form-function
     fetchChatId()
   }, [getChatId, storedChatId])
 
-  // обработчик отправки формы
+  // form submit handler
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
 
-    // проверка заполнения формы и наличия chatId
+    // validation inspect
     if (!message || !phone || !date || !chatId) {
       console.error('Все поля должны быть заполнены')
       return
     }
 
-    // отправка данных в Telegram той самой ф-цией formRequest
+    // Set up sending form data types
     await formRequest(
       String(message),
       Number(phone),
       Number(date),
       String(chatId),
     )
+    alert('Your order was sending to chief')
   }
 
   return (
     <section className={styles.formSection}>
+      <AnswerCircle />
       <form className={styles.telegramForm} onSubmit={handleSubmit}>
         <input
           type='text'
-          placeholder='Отправляй поздравление, огузок!'
+          placeholder='Send your order, bich'
           value={message}
           onChange={(e) => setMessage(e.target.value)}
         />
         <input
           type='tel'
-          placeholder='Введите своё ID чтоб тебя потом спец-службы вычислили'
-          // используем оператор нулевого слияния для предоставления значения по умолчанию
+          placeholder='Enter the message, its very necessary for me'
+          // we used zero merge operator for placed a default state
           value={phone ?? ''}
           onChange={(e) => setPhone(Number(e.target.value))}
         />
@@ -85,11 +70,11 @@ export const Home: React.FC = () => {
           value={date}
           onChange={(e) => setDate(e.target.value)}
         />
-        <button className={styles.sendBtn}>Отправить поздравление</button>
+        <button className={styles.sendBtn}>Send order</button>
       </form>
       <Image
-        width={300}
-        height={300}
+        width={350}
+        height={390}
         alt='Chief'
         src={chief}
         priority
