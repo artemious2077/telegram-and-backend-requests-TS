@@ -53,9 +53,13 @@ interface BotChatId_state {
 
 // Received ID bot chat function
 export const BotChatId = create<BotChatId_state>((set, get) => ({
-  chatId: null,
+  chatId: '1686652259',
   offset: 0,
   getChatId: async () => {
+    // Hardcode. If you use this variant, comment all underside code
+    // const chatId = '1686652259'
+    // set({ chatId })
+
     // Receive update by using get
     const { offset } = get()
 

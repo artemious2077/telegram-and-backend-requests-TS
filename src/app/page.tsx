@@ -12,6 +12,10 @@ export const Home: React.FC = () => {
   // we using | sign, not logic || sign
   const [phone, setPhone] = useState<number | null>(null)
   const [date, setDate] = useState<string>('')
+
+  // Hardcoded chat ID. If you use this variant, comment useEffect & chat ID state save
+  // const chatId = '1686652259'
+
   // chat ID state save
   const [chatId, setChatId] = useState<string | null>(null)
   // receiving state hooks from BotChatId
